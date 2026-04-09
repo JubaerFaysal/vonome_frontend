@@ -1,0 +1,153 @@
+<div class="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4 sm:p-6 backdrop-blur-md animate-fade-in" (click)="onBackdropClick($event)">
+  <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[95vh] flex flex-col shadow-2xl transform transition-all" (click)="$event.stopPropagation()">
+    
+    <!-- Header (Sticky) -->
+    <div class="p-5 sm:p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-primary-500 to-primary-600 text-white shrink-0 rounded-t-2xl">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-bold">Order Payment</h2>
+        <p class="text-primary-100 text-xs sm:text-sm mt-1">Complete the transaction securely</p>
+      </div>
+      <button (click)="close.emit()" class="text-white hover:text-primary-100 p-2 hover:bg-white/20 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 w-10 h-10 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="p-5 sm:p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1 min-h-0">
+      
+      <!-- Total Amount Display -->
+      <div class="bg-primary-50 rounded-2xl p-6 text-center border border-primary-100 shadow-inner">
+        <span class="text-gray-600 text-xs sm:text-sm font-medium block mb-1 uppercase tracking-wider">Total Amount Due</span>
+        <span class="text-4xl sm:text-5xl font-extrabold text-primary-600 tracking-tight">Tk {{ amount | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Payment Methods -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-800 mb-3">Select Payment Method</label>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <button 
+            *ngFor="let method of paymentMethods"
+            (click)="selectMethod(method.id)"
+            [class]="selectedMethod === method.id 
+              ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-200' 
+              : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'"
+            class="flex sm:flex-col items-center justify-center p-4 sm:p-6 border rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 group shadow-sm hover:shadow-md"
+          >
+            <div class="text-3xl sm:text-4xl sm:mb-3 transform group-hover:scale-110 transition-transform sm:mr-0 mr-4">{{ method.icon }}</div>
+            <span class="text-sm font-bold" [class]="selectedMethod === method.id ? 'text-primary-700' : 'text-gray-700'">
+              {{ method.name }}
+            </span>
+            <div *ngIf="selectedMethod === method.id" class="hidden sm:block absolute top-2 right-2 text-primary-500">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Input Amount -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-800 mb-2">Received Amount</label>
+        <div class="relative group">
+          <span class="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold text-xl group-focus-within:text-primary-500 transition-colors">Tk</span>
+          <input 
+            type="number" 
+            [(ngModel)]="inputAmount"
+            (input)="calculateChange()"
+            class="w-full pl-16 pr-5 py-4 text-2xl sm:text-3xl font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-100 focus:outline-none transition-all shadow-sm"
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+          >
+        </div>
+        <div class="flex justify-between items-center mt-3 px-1">
+          <span class="text-xs text-gray-500">Quick select:</span>
+          <div class="flex space-x-2">
+            <button (click)="setQuickAmount(amount)" class="px-3 py-1.5 text-xs bg-primary-50 text-primary-600 hover:bg-primary-100 rounded-lg font-semibold transition-colors border border-primary-100">Exact amount</button>
+            <button (click)="setQuickAmount(Math.ceil(amount / 10) * 10)" class="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-semibold transition-colors border border-gray-200">Round up</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculations Breakdown -->
+      <div class="bg-gray-50 rounded-xl p-5 sm:p-6 space-y-3 border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-center font-medium py-1">
+          <span class="text-gray-500 text-sm">Subtotal</span>
+          <span class="text-gray-800">Tk {{ amount * 0.909 | number:'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between items-center font-medium py-1">
+          <span class="text-gray-500 text-sm">VAT/Tax <span class="text-xs">(10%)</span></span>
+          <span class="text-gray-800">Tk {{ amount * 0.091 | number:'1.2-2' }}</span>
+        </div>
+        
+        <div class="border-t border-gray-200/80 my-3"></div>
+        
+        <div class="flex justify-between items-center py-2 bg-green-50/80 px-4 rounded-lg border border-green-100/50">
+          <span class="text-green-800 font-semibold text-sm">Paid Amount</span>
+          <span class="font-bold text-green-700 text-lg">Tk {{ inputAmount || 0 | number:'1.2-2' }}</span>
+        </div>
+        
+        <div class="flex justify-between items-center py-3 font-bold text-base px-4" 
+             [class]="dueAmount > 0 ? 'text-red-700 bg-red-50 rounded-lg border border-red-100' : 'text-green-700 bg-white border border-green-100 rounded-lg shadow-sm block relative overflow-hidden'">
+          <div *ngIf="dueAmount <= 0" class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+          <span>{{ dueAmount > 0 ? 'Due Amount' : (returnAmount > 0 ? 'Change/Return' : 'Balance') }}</span>
+          <span class="text-xl">Tk {{ dueAmount > 0 ? (dueAmount | number:'1.2-2') : (returnAmount | number:'1.2-2') }}</span>
+        </div>
+      </div>
+
+      <!-- Status Indicator -->
+      <div class="flex items-center justify-center space-x-2 text-sm bg-gray-50 py-2 rounded-lg" *ngIf="selectedMethod">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+        </span>
+        <span class="text-gray-600 font-medium">Ready to process <span class="text-gray-900">{{ getMethodName() }}</span> payment</span>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-start shadow-sm">
+        <svg class="w-5 h-5 text-red-500 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+    </div>
+
+    <!-- Actions (Sticky Footer) -->
+    <div class="p-5 sm:p-6 bg-gray-50 border-t border-gray-100 shrink-0 rounded-b-2xl">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="flex gap-3 sm:w-1/2">
+          <button 
+            (click)="close.emit()"
+            class="flex-1 py-3.5 px-4 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-300 focus:ring-4 focus:ring-gray-100 transition-all shadow-sm"
+          >
+            Cancel
+          </button>
+          <button 
+            (click)="saveAsDraft()"
+            class="flex-1 py-3.5 px-4 bg-orange-50 border border-orange-200 text-orange-700 rounded-xl font-bold hover:bg-orange-100 focus:ring-4 focus:ring-orange-100 transition-all shadow-sm"
+            [disabled]="loading"
+          >
+            Save Draft
+          </button>
+        </div>
+        <button 
+          (click)="processPayment()"
+          [disabled]="!canProcessPayment()"
+          class="flex-1 sm:w-1/2 py-3.5 px-6 bg-primary-500 text-white rounded-xl font-bold text-lg focus:ring-4 focus:ring-primary-200 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-500/30 flex items-center justify-center group"
+          [class.animate-pulse]="loading"
+        >
+          <span *ngIf="!loading">Pay Tk {{ dueAmount > 0 ? (inputAmount || 0) : amount | number:'1.0-0' }}</span>
+          <span *ngIf="loading" class="flex items-center">
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+          </span>
+          <svg *ngIf="!loading" class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
