@@ -136,13 +136,35 @@ ng generate --help
 
 ## 📸 Screenshots
 
-Screenshots of the application features are available in the `app_screenshots/` folder:
-- Sample transaction flow
-- Product selection interface
-- Customer information management
-- Order confirmation screens
-- Receipt generation
-- Payment processing interface
+### Dashboard & POS Interface
+![Dashboard](./app_screenshots/Screenshot%202026-04-13%20at%208.57.41%20PM.png)
+
+### Product Selection
+![Product Selection](./app_screenshots/Screenshot%202026-04-13%20at%208.57.56%20PM.png)
+
+### Transaction Flow
+![Transaction Flow](./app_screenshots/Screenshot%202026-04-13%20at%209.57.13%20PM.png)
+
+### Customer Management
+![Customer Management](./app_screenshots/Screenshot%202026-04-13%20at%209.58.15%20PM.png)
+
+### Order Processing
+![Order Processing](./app_screenshots/Screenshot%202026-04-13%20at%209.58.31%20PM.png)
+
+### Payment Interface
+![Payment Interface](./app_screenshots/Screenshot%202026-04-13%20at%209.58.44%20PM.png)
+
+### Receipt Display
+![Receipt Display](./app_screenshots/Screenshot%202026-04-13%20at%209.58.55%20PM.png)
+
+### Order Confirmation
+![Order Confirmation](./app_screenshots/Screenshot%202026-04-13%20at%209.59.03%20PM.png)
+
+### Inventory Management
+![Inventory Management](./app_screenshots/Screenshot%202026-04-13%20at%209.59.13%20PM.png)
+
+### Final Summary
+![Summary](./app_screenshots/Screenshot%202026-04-13%20at%209.59.34%20PM.png)
 
 ## 🏗️ Architecture
 
