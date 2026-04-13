@@ -136,12 +136,6 @@ ng generate --help
 
 ## 📸 Screenshots
 
-### Dashboard & POS Interface
-![Dashboard](./app_screenshots/Screenshot%202026-04-13%20at%208.57.41%20PM.png)
-
-### Product Selection
-![Product Selection](./app_screenshots/Screenshot%202026-04-13%20at%208.57.56%20PM.png)
-
 ### Transaction Flow
 ![Transaction Flow](./app_screenshots/Screenshot%202026-04-13%20at%209.57.13%20PM.png)
 
