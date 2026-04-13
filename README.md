@@ -210,29 +210,7 @@ The application follows Angular best practices with:
 - All components include TypeScript interfaces and type safety
 - The application is fully responsive and mobile-optimized
 
-## 🤝 Contributing
 
-Guidelines for contributing to this project:
-1. Create feature branches from main
-2. Write tests for new features
-3. Follow the existing code structure and naming conventions
-4. Ensure all tests pass before submitting a pull request
-5. Use Prettier for code formatting
-
-## 📄 License
-
-This project is private and proprietary to Vonome.
 
 ---
 
-For more information about Angular, visit the [Angular Documentation](https://angular.io/docs).
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
