@@ -137,28 +137,28 @@ ng generate --help
 ## 📸 Screenshots
 
 ### Transaction Flow
-![Transaction Flow](./app_screenshots/Screenshot%202026-04-13%20at%209.57.13%20PM.png)
+![Transaction Flow](./app_screenshots/Screenshot%202026-04-13%20at%209.57.13%E2%80%AFPM.png)
 
 ### Customer Management
-![Customer Management](./app_screenshots/Screenshot%202026-04-13%20at%209.58.15%20PM.png)
+![Customer Management](./app_screenshots/Screenshot%202026-04-13%20at%209.58.15%E2%80%AFPM.png)
 
 ### Order Processing
-![Order Processing](./app_screenshots/Screenshot%202026-04-13%20at%209.58.31%20PM.png)
+![Order Processing](./app_screenshots/Screenshot%202026-04-13%20at%209.58.31%E2%80%AFPM.png)
 
 ### Payment Interface
-![Payment Interface](./app_screenshots/Screenshot%202026-04-13%20at%209.58.44%20PM.png)
+![Payment Interface](./app_screenshots/Screenshot%202026-04-13%20at%209.58.44%E2%80%AFPM.png)
 
 ### Receipt Display
-![Receipt Display](./app_screenshots/Screenshot%202026-04-13%20at%209.58.55%20PM.png)
+![Receipt Display](./app_screenshots/Screenshot%202026-04-13%20at%209.58.55%E2%80%AFPM.png)
 
 ### Order Confirmation
-![Order Confirmation](./app_screenshots/Screenshot%202026-04-13%20at%209.59.03%20PM.png)
+![Order Confirmation](./app_screenshots/Screenshot%202026-04-13%20at%209.59.03%E2%80%AFPM.png)
 
 ### Inventory Management
-![Inventory Management](./app_screenshots/Screenshot%202026-04-13%20at%209.59.13%20PM.png)
+![Inventory Management](./app_screenshots/Screenshot%202026-04-13%20at%209.59.13%E2%80%AFPM.png)
 
 ### Final Summary
-![Summary](./app_screenshots/Screenshot%202026-04-13%20at%209.59.34%20PM.png)
+![Summary](./app_screenshots/Screenshot%202026-04-13%20at%209.59.34%E2%80%AFPM.png)
 
 ## 🏗️ Architecture
 
