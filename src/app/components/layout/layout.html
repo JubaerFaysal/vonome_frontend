@@ -24,7 +24,7 @@
          #rla="routerLinkActive"
          [class.text-gray-600]="!rla.isActive"
          [class.hover:bg-gray-100]="!rla.isActive"
-         class="group flex items-center px-3 py-3 rounded-xl transition-all duration-200 cursor-pointer">
+         class="group flex items-center px-3 py-3 rounded-lg transition-all duration-200 cursor-pointer">
         <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 mr-3 shrink-0"
              [class]="rla.isActive ? 'bg-primary-100 text-primary-600' : 'text-gray-400 group-hover:text-gray-600'">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,17 +35,6 @@
         <span *ngIf="rla.isActive" class="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0"></span>
       </a>
     </nav>
-
-    <!-- User card -->
-    <div class="p-4 m-4 rounded-xl bg-white border border-gray-200/50 shadow-sm flex items-center shrink-0">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-white shadow-sm shrink-0">
-        AM
-      </div>
-      <div class="ml-3 flex flex-col min-w-0">
-        <span class="text-sm font-bold text-gray-900 truncate">Admin User</span>
-        <span class="text-xs text-gray-500 truncate">admin&#64;vonome.com</span>
-      </div>
-    </div>
   </aside>
 
   <!-- Main Content -->

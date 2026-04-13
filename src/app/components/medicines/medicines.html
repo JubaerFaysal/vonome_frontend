@@ -1,14 +1,13 @@
 <!-- Container with proper height -->
 <div class="h-screen flex flex-col overflow-hidden">
-  <!-- Sticky Header -->
-  <div class="sticky top-0 z-20 bg-white border-b border-gray-200 p-8 shrink-0 shadow-sm">
-    <div class="flex items-center justify-between">
+  <!-- Compact Header -->
+  <div class="sticky top-0 z-20 bg-white border-b border-gray-200 px-6 py-3 shrink-0 shadow-sm">
+    <div class="flex items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-gray-800">Inventory Management</h1>
-        <p class="text-gray-500 mt-1">Manage medicines, stock, and pricing</p>
+        <h1 class="text-lg font-bold text-gray-900">Medicines</h1>
       </div>
-      <button (click)="openAddModal()" class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl shadow-lg shadow-primary-500/30 flex items-center transition-all font-medium">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+      <button (click)="openAddModal()" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium flex items-center transition-all whitespace-nowrap">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Add Medicine
       </button>
     </div>
@@ -16,121 +15,341 @@
 
   <!-- Scrollable Content Area -->
   <div class="flex-1 overflow-y-auto min-h-0">
-    <div class="p-8 pb-16">
-      <div class="glass-panel rounded-2xl flex flex-col overflow-hidden">
-        <!-- Filters -->
-        <div class="p-6 border-b border-gray-200/50 flex flex-col sm:flex-row gap-4 shrink-0">
-          <div class="relative w-full max-w-md">
-            <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="loadMedicines()" placeholder="Search purely by name, generic or barcode..." class="w-full pl-11 pr-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none transition-shadow">
-            <svg class="w-5 h-5 text-gray-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    <div class="p-4 pb-16">
+      <div class="glass-panel rounded-lg flex flex-col overflow-hidden">
+      <!-- Filters -->
+      <div class="px-4 py-3 border-b border-gray-200 bg-white flex gap-2 items-center">
+        <div class="relative flex-1 max-w-md">
+          <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="loadMedicines()" placeholder="Search medicine..." class="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none focus:bg-white transition-all">
+          <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <button (click)="loadMedicines()" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors">Search</button>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto">
+        <!-- Loading State -->
+        <div *ngIf="loading" class="flex items-center justify-center py-16">
+          <div class="text-center">
+            <svg class="w-12 h-12 text-primary-500 animate-spin mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+            <p class="text-gray-500">Loading medicines...</p>
           </div>
-          <button (click)="loadMedicines()" class="px-6 py-3 bg-white/60 hover:bg-white border border-gray-200 rounded-xl text-gray-700 font-medium transition-colors">Search</button>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!loading && medicines.length === 0" class="text-center py-16">
+          <div class="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            </svg>
+          </div>
+          <p class="text-gray-600 font-medium">No medicines found</p>
+          <p class="text-gray-400 text-sm mt-1">Add some medicines to get started</p>
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto custom-scrollbar">
-          <table class="w-full text-left border-collapse">
-            <thead class="sticky top-0 bg-gray-50/90 backdrop-blur-md z-10 shadow-sm">
-              <tr>
-                <th class="py-4 px-6 font-semibold text-gray-600 text-sm">Medicine Name</th>
-                <th class="py-4 px-6 font-semibold text-gray-600 text-sm">Generic & Brand</th>
-                <th class="py-4 px-6 font-semibold text-gray-600 text-sm">Barcode</th>
-                <th class="py-4 px-6 font-semibold text-gray-600 text-sm text-right">Stock</th>
-                <th class="py-4 px-6 font-semibold text-gray-600 text-sm text-right">Price</th>
-                <th class="py-4 px-6 font-semibold text-gray-600 text-sm text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="loading" class="animate-pulse">
-                <td colspan="6" class="py-12 text-center text-gray-400">Loading medicines...</td>
-              </tr>
-              <tr *ngIf="!loading && medicines.length === 0">
-                <td colspan="6" class="py-16 text-center text-gray-400">
-                   <div class="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                   </div>
-                   No medicines found. Adding some!
-                </td>
-              </tr>
-              <tr *ngFor="let m of medicines" class="border-b border-gray-100/50 hover:bg-primary-50/30 transition-colors">
-                <td class="py-4 px-6">
-                  <span class="font-semibold text-gray-800">{{ m.name }}</span>
-                </td>
-                <td class="py-4 px-6 text-sm">
-                  <div class="text-gray-800">{{ m.generic }}</div>
-                  <div class="text-gray-500 text-xs mt-0.5">{{ m.brand }}</div>
-                </td>
-                <td class="py-4 px-6 text-sm text-gray-600">{{ m.barcode }}</td>
-                <td class="py-4 px-6 text-right">
-                  <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-semibold"
-                        [class]="m.stockQuantity > 10 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
-                    {{ m.stockQuantity }}
+        <table *ngIf="!loading && medicines.length > 0" class="w-full">
+          <thead>
+            <tr class="border-b-2 border-gray-300 bg-gray-50">
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-200">Medicine Name</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-200">Generic & Brand</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-200">Barcode</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-200">Stock</th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-200">Price</th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-200">Discount</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-300">
+            <tr *ngFor="let m of medicines; trackBy: trackByMedicineId" class="hover:bg-primary-50/50 transition-colors group">
+              <!-- Medicine Name -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-700 font-bold text-xs">
+                    {{ m.name.charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ m.name }}</p>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Generic & Brand -->
+              <td class="px-6 py-4">
+                <div class="text-sm">
+                  <p class="text-gray-900 font-medium">{{ m.generic }}</p>
+                  <p class="text-gray-500 text-xs">{{ m.brand }}</p>
+                </div>
+              </td>
+
+              <!-- Barcode -->
+              <td class="px-6 py-4">
+                <span class="font-mono text-sm text-gray-600 bg-gray-50 px-2.5 py-1 rounded">{{ m.barcode }}</span>
+              </td>
+
+              <!-- Stock -->
+              <td class="px-6 py-4 text-center">
+                <div class="flex flex-col items-center">
+                  <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-semibold mb-1"
+                        [class]="m.stockQuantity > 10 ? 'bg-green-100 text-green-700' : m.stockQuantity > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'">
+                    {{ m.stockQuantity }} <span class="ml-1 text-xs">units</span>
                   </span>
-                </td>
-                <td class="py-4 px-6 text-right">
-                  <div class="font-medium text-gray-900">Tk. {{ m.price }}</div>
-                  <div *ngIf="m.isDiscounted" class="text-xs text-red-500">{{ m.discountPercent }}% OFF</div>
-                </td>
-                <td class="py-4 px-6 text-center">
-                  <button (click)="openEditModal(m)" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <div class="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all"
+                         [style.width.%]="(m.stockQuantity / 50) * 100"
+                         [class]="m.stockQuantity > 10 ? 'bg-green-500' : m.stockQuantity > 0 ? 'bg-yellow-500' : 'bg-red-500'">
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Price -->
+              <td class="px-6 py-4 text-right">
+                <span class="text-sm font-bold text-gray-900">৳ {{ m.price }}</span>
+              </td>
+
+              <!-- Discount -->
+              <td class="px-6 py-4 text-right">
+                <div *ngIf="m.isDiscounted" class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 5 5 3-4 2 5z"/>
+                  </svg>
+                  <span class="text-xs font-semibold">{{ m.discountPercent }}%</span>
+                </div>
+                <span *ngIf="!m.isDiscounted" class="text-xs text-gray-400">—</span>
+              </td>
+
+              <!-- Action -->
+              <td class="px-6 py-4 text-center">
+                <button (click)="openEditModal(m)" 
+                        class="px-3 py-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors text-sm font-medium group-hover:text-primary-700">
+                  <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       </div>
     </div>
   </div>
 
 <!-- Modal -->
-<div *ngIf="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm animate-fade-in">
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden glass-panel">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-      <h3 class="text-xl font-bold text-gray-800">{{ isEditing ? 'Edit' : 'Add' }} Medicine</h3>
-      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+<div *ngIf="showAddModal" class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 backdrop-blur-sm"
+     (click)="closeModal()">
+  <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[96vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="p-5 sm:p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl sticky top-0 z-10">
+      <div>
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800">{{ isEditing ? 'Edit Medicine' : 'Add New Medicine' }}</h2>
+        <p class="text-sm text-gray-500 mt-1">{{ isEditing ? 'Update medicine details' : 'Add a new medicine to inventory' }}</p>
+      </div>
+      <button (click)="closeModal()"
+              class="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+              aria-label="Close">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
-    <div class="p-6">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-          <input type="text" [(ngModel)]="currentMedicine.name" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Generic</label>
-          <input type="text" [(ngModel)]="currentMedicine.generic" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Barcode</label>
-          <input type="text" [(ngModel)]="currentMedicine.barcode" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
-          <input type="text" [(ngModel)]="currentMedicine.brand" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Price (Tk)</label>
-          <input type="number" [(ngModel)]="currentMedicine.price" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Stock Quantity</label>
-          <input type="number" [(ngModel)]="currentMedicine.stockQuantity" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none">
-        </div>
-        <div class="col-span-2 flex items-center space-x-6 mt-2">
-          <label class="flex items-center space-x-2">
-            <input type="checkbox" [(ngModel)]="currentMedicine.isDiscounted" class="w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
-            <span class="text-sm font-medium text-gray-700">Has Discount</span>
-          </label>
-          <div *ngIf="currentMedicine.isDiscounted" class="flex-1">
-            <input type="number" [(ngModel)]="currentMedicine.discountPercent" placeholder="Discount %" class="w-32 px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none">
+
+    <!-- Server Error -->
+    <div *ngIf="serverError" class="mx-5 mt-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start gap-2" role="alert">
+      <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {{ serverError }}
+    </div>
+
+    <form (ngSubmit)="saveMedicine()" class="p-5 sm:p-6 space-y-6" novalidate>
+
+      <!-- Basic Information Section -->
+      <div>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Basic Information
+        </h3>
+        <div class="space-y-4">
+          <!-- Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Medicine Name <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   [(ngModel)]="currentMedicine.name" 
+                   name="name"
+                   placeholder="e.g., Paracetamol"
+                   class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                   [class.border-red-400]="hasError('name')"
+                   [class.border-gray-200]="!hasError('name')">
+            <p *ngIf="hasError('name')" class="text-red-500 text-xs mt-1">{{ formErrors['name'] }}</p>
+          </div>
+
+          <!-- Generic Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Generic Name <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   [(ngModel)]="currentMedicine.generic" 
+                   name="generic"
+                   placeholder="e.g., Acetaminophen"
+                   class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                   [class.border-red-400]="hasError('generic')"
+                   [class.border-gray-200]="!hasError('generic')">
+            <p *ngIf="hasError('generic')" class="text-red-500 text-xs mt-1">{{ formErrors['generic'] }}</p>
+          </div>
+
+          <!-- Barcode -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Barcode <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   [(ngModel)]="currentMedicine.barcode" 
+                   name="barcode"
+                   placeholder="Enter barcode"
+                   class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                   [class.border-red-400]="hasError('barcode')"
+                   [class.border-gray-200]="!hasError('barcode')">
+            <p *ngIf="hasError('barcode')" class="text-red-500 text-xs mt-1">{{ formErrors['barcode'] }}</p>
+          </div>
+
+          <!-- Brand -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Brand <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   [(ngModel)]="currentMedicine.brand" 
+                   name="brand"
+                   placeholder="e.g., Napa, Square"
+                   class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                   [class.border-red-400]="hasError('brand')"
+                   [class.border-gray-200]="!hasError('brand')">
+            <p *ngIf="hasError('brand')" class="text-red-500 text-xs mt-1">{{ formErrors['brand'] }}</p>
           </div>
         </div>
       </div>
-    </div>
-    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end space-x-3">
-      <button (click)="closeModal()" class="px-5 py-2.5 text-gray-600 hover:bg-gray-200 rounded-xl font-medium transition-colors">Cancel</button>
-      <button (click)="saveMedicine()" class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl shadow-lg shadow-primary-500/30 font-medium transition-colors">Save Medicine</button>
-    </div>
+
+      <!-- Divider -->
+      <div class="border-t border-gray-100"></div>
+
+      <!-- Pricing & Stock Section -->
+      <div>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Pricing & Stock
+        </h3>
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Price -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Price (Tk) <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-gray-500 text-sm font-medium">৳</span>
+              <input type="number" 
+                     [(ngModel)]="currentMedicine.price" 
+                     name="price"
+                     placeholder="0.00"
+                     step="0.01"
+                     min="0"
+                     class="w-full pl-8 p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                     [class.border-red-400]="hasError('price')"
+                     [class.border-gray-200]="!hasError('price')">
+            </div>
+            <p *ngIf="hasError('price')" class="text-red-500 text-xs mt-1">{{ formErrors['price'] }}</p>
+          </div>
+
+          <!-- Stock Quantity -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Stock Quantity <span class="text-red-500">*</span>
+            </label>
+            <input type="number" 
+                   [(ngModel)]="currentMedicine.stockQuantity" 
+                   name="stockQuantity"
+                   placeholder="0"
+                   min="0"
+                   class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                   [class.border-red-400]="hasError('stockQuantity')"
+                   [class.border-gray-200]="!hasError('stockQuantity')">
+            <p *ngIf="hasError('stockQuantity')" class="text-red-500 text-xs mt-1">{{ formErrors['stockQuantity'] }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="border-t border-gray-100"></div>
+
+      <!-- Discount Section -->
+      <div>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7c-.39.391-.902.586-1.414.586H7a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+          </svg>
+          Discount Settings
+        </h3>
+        <div class="space-y-4">
+          <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50/50 transition-colors cursor-pointer">
+            <input type="checkbox" 
+                   [(ngModel)]="currentMedicine.isDiscounted" 
+                   name="isDiscounted"
+                   class="w-4 h-4 text-primary-500 rounded focus:ring-primary-500 border-gray-300">
+            <span class="text-sm font-medium text-gray-700">Apply Discount</span>
+          </label>
+
+          <div *ngIf="currentMedicine.isDiscounted" class="pl-7 pt-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Discount Percentage <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input type="number" 
+                     [(ngModel)]="currentMedicine.discountPercent" 
+                     name="discountPercent"
+                     placeholder="0"
+                     min="0"
+                     max="100"
+                     class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                     [class.border-red-400]="hasError('discountPercent')"
+                     [class.border-gray-200]="!hasError('discountPercent')">
+              <span class="absolute right-3 top-2.5 text-gray-500 text-sm font-medium">%</span>
+            </div>
+            <p *ngIf="hasError('discountPercent')" class="text-red-500 text-xs mt-1">{{ formErrors['discountPercent'] }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 pt-4 sm:pt-2">
+        <button type="button" 
+                (click)="closeModal()"
+                [disabled]="submitting"
+                class="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm">
+          Cancel
+        </button>
+        <button type="submit"
+                [disabled]="submitting"
+                class="flex-1 py-3 bg-primary-500 text-white rounded-xl font-medium hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-primary-500/30 text-sm flex items-center justify-center gap-2">
+          <svg *ngIf="submitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+          </svg>
+          {{ submitting ? (isEditing ? 'Updating…' : 'Adding…') : (isEditing ? 'Update Medicine' : 'Add Medicine') }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

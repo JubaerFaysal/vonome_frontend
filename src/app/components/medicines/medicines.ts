@@ -18,6 +18,9 @@ export class MedicinesComponent implements OnInit {
   showAddModal = false;
   isEditing = false;
   currentMedicine: Partial<Medicine> = {};
+  formErrors: Record<string, string> = {};
+  submitting = false;
+  serverError = '';
 
   constructor(private medicineService: MedicineService, private cdr: ChangeDetectorRef) {}
 
@@ -43,6 +46,8 @@ export class MedicinesComponent implements OnInit {
 
   openAddModal(): void {
     this.isEditing = false;
+    this.formErrors = {};
+    this.serverError = '';
     this.currentMedicine = {
       isDiscounted: false,
       discountPercent: 0,
@@ -54,32 +59,66 @@ export class MedicinesComponent implements OnInit {
 
   openEditModal(medicine: Medicine): void {
     this.isEditing = true;
+    this.formErrors = {};
+    this.serverError = '';
     this.currentMedicine = { ...medicine };
     this.showAddModal = true;
   }
 
   closeModal(): void {
     this.showAddModal = false;
+    this.formErrors = {};
+    this.serverError = '';
+    this.submitting = false;
   }
 
   saveMedicine(): void {
-    // Filter out computed fields that shouldn't be sent to API
-    const payload = this.sanitizePayload(this.currentMedicine);
+    this.formErrors = {};
+    this.serverError = '';
 
-    if (!payload.name || !payload.generic || !payload.barcode || !payload.brand) {
-      alert('Please fill in all required fields');
+    // Validation
+    if (!this.currentMedicine.name?.trim()) {
+      this.formErrors['name'] = 'Medicine name is required';
+    }
+    if (!this.currentMedicine.generic?.trim()) {
+      this.formErrors['generic'] = 'Generic name is required';
+    }
+    if (!this.currentMedicine.barcode?.trim()) {
+      this.formErrors['barcode'] = 'Barcode is required';
+    }
+    if (!this.currentMedicine.brand?.trim()) {
+      this.formErrors['brand'] = 'Brand is required';
+    }
+    if (!this.currentMedicine.price || this.currentMedicine.price <= 0) {
+      this.formErrors['price'] = 'Price must be greater than 0';
+    }
+    if (this.currentMedicine.stockQuantity === undefined || this.currentMedicine.stockQuantity < 0) {
+      this.formErrors['stockQuantity'] = 'Stock quantity cannot be negative';
+    }
+    if (this.currentMedicine.isDiscounted && (!this.currentMedicine.discountPercent || this.currentMedicine.discountPercent <= 0)) {
+      this.formErrors['discountPercent'] = 'Discount must be greater than 0';
+    }
+
+    if (Object.keys(this.formErrors).length > 0) {
+      this.cdr.markForCheck();
       return;
     }
+
+    this.submitting = true;
+    const payload = this.sanitizePayload(this.currentMedicine);
 
     if (this.isEditing && this.currentMedicine.id) {
       this.medicineService.updateMedicine(this.currentMedicine.id.toString(), payload).subscribe({
         next: () => {
           this.loadMedicines();
           this.closeModal();
+          this.submitting = false;
         },
         error: (err) => {
           console.error('Failed to update medicine', err);
-          alert(`Failed to update medicine: ${err.message}`);
+          this.serverError = err?.message || 'Failed to update medicine';
+          this.submitting = false;
+          this.cdr.markForCheck();
         }
       });
     } else {
@@ -87,13 +126,20 @@ export class MedicinesComponent implements OnInit {
         next: () => {
           this.loadMedicines();
           this.closeModal();
+          this.submitting = false;
         },
         error: (err) => {
           console.error('Failed to create medicine', err);
-          alert(`Failed to create medicine: ${err.message}`);
+          this.serverError = err?.message || 'Failed to create medicine';
+          this.submitting = false;
+          this.cdr.markForCheck();
         }
       });
     }
+  }
+
+  hasError(field: string): boolean {
+    return !!this.formErrors[field];
   }
 
   private sanitizePayload(medicine: Partial<Medicine>): Partial<Medicine> {
@@ -109,5 +155,9 @@ export class MedicinesComponent implements OnInit {
       discountPercent: payload.discountPercent,
       imageUrl: payload.imageUrl ?? undefined
     };
+  }
+
+  trackByMedicineId(index: number, medicine: Medicine): any {
+    return medicine.id || index;
   }
 }

@@ -1,52 +1,209 @@
-# VonomeFrontend
+# Vonome Frontend - POS System
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.6.
+A modern Point of Sale (POS) application built with Angular 21 offering a comprehensive solution for retail and pharmacy management. This application provides an intuitive interface for managing sales, inventory, customers, and orders.
 
-## Development server
+## 📋 Overview
 
-To start a local development server, run:
+Vonome is a full-featured POS system designed to streamline retail operations with real-time inventory management, customer records, order tracking, and payment processing. Built with modern Angular standalone components and Tailwind CSS for a responsive, user-friendly experience.
 
+## ✨ Key Features
+
+- **Point of Sale (POS)**: Intuitive sales interface for quick transactions
+- **Inventory Management**: Manage medicines and products with real-time stock updates
+- **Customer Management**: Maintain customer profiles and purchase history
+- **Shopping Cart**: Add items to cart with quantity management and price calculations
+- **Order Management**: Track and manage customer orders
+- **Payment Processing**: Secure payment handling and transaction management
+- **Receipt Generation**: Generate and print receipts for completed transactions
+- **Responsive Design**: Mobile-friendly interface powered by Tailwind CSS
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Angular 21.2.0](https://angular.io) (Standalone Components)
+- **Language**: TypeScript 5.9.2
+- **Styling**: [Tailwind CSS 4.1.12](https://tailwindcss.com)
+- **Testing**: [Vitest 4.0.8](https://vitest.dev/)
+- **Build Tool**: Angular CLI 21.2.6
+- **Package Manager**: Yarn 1.22.22
+- **State Management**: RxJS 7.8.0
+
+## 📁 Project Structure
+
+```
+vonome_frontend/
+├── src/
+│   ├── app/
+│   │   ├── components/
+│   │   │   ├── pos/              # Point of Sale component
+│   │   │   ├── medicines/        # Medicine/Product management
+│   │   │   ├── customers/        # Customer management
+│   │   │   ├── orders/           # Order management
+│   │   │   ├── payment/          # Payment processing
+│   │   │   ├── receipt/          # Receipt generation
+│   │   │   ├── add-customer/     # Customer creation
+│   │   │   ├── layout/           # Layout/Navigation
+│   │   │   └── shared/           # Shared components
+│   │   ├── models/
+│   │   │   ├── customer.model.ts # Customer data model
+│   │   │   ├── medicine.model.ts # Medicine/Product model
+│   │   │   └── order.model.ts    # Order data model
+│   │   ├── services/
+│   │   │   ├── cart.ts           # Shopping cart service
+│   │   │   ├── customer.ts       # Customer service
+│   │   │   ├── medicine.ts       # Medicine service
+│   │   │   └── order.ts          # Order service
+│   │   ├── app.routes.ts         # Application routing
+│   │   └── app.ts                # Root component
+│   ├── environment/              # Environment configuration
+│   └── main.ts                   # Application entry point
+├── public/                       # Static assets
+├── app_screenshots/              # Application screenshots
+├── angular.json                  # Angular CLI configuration
+├── tailwind.config.js            # Tailwind CSS configuration
+└── package.json                  # Project dependencies
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- Yarn 1.22.22 or npm
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd vonome_frontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   yarn install
+   ```
+   Or with npm:
+   ```bash
+   npm install
+   ```
+
+### Development Server
+
+Start the development server:
+
+```bash
+npm start
+```
+Or:
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Once running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any source files.
 
-## Code scaffolding
+### Building for Production
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Build the project for deployment:
+
+```bash
+npm run build
+```
+
+The build artifacts will be stored in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+## 🧪 Testing
+
+### Running Unit Tests
+
+Execute unit tests with [Vitest](https://vitest.dev/):
+
+```bash
+npm test
+```
+
+### Code Scaffolding
+
+Generate new components using Angular CLI:
 
 ```bash
 ng generate component component-name
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+For a complete list of available schematics:
 ```bash
 ng generate --help
 ```
 
-## Building
+## 📸 Screenshots
 
-To build the project run:
+Screenshots of the application features are available in the `app_screenshots/` folder:
+- Sample transaction flow
+- Product selection interface
+- Customer information management
+- Order confirmation screens
+- Receipt generation
+- Payment processing interface
 
-```bash
-ng build
-```
+## 🏗️ Architecture
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The application follows Angular best practices with:
 
-## Running unit tests
+- **Standalone Components**: Modern Angular architecture using standalone components
+- **Modular Services**: Separation of concerns with dedicated services for each domain
+- **Typed Models**: Strong typing with TypeScript models for customers, medicines, and orders
+- **Reactive State**: RxJS observables for state management
+- **Component-Based UI**: Reusable, maintainable component structure
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## 🔧 Available Scripts
 
-```bash
-ng test
-```
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start development server |
+| `npm run build` | Build for production |
+| `npm test` | Run unit tests |
+| `npm run watch` | Watch mode for development |
+| `ng generate component [name]` | Create new component |
 
-## Running end-to-end tests
+## 📦 Dependencies
 
-For end-to-end (e2e) testing, run:
+### Core Dependencies
+- `@angular/core`: Core Angular framework
+- `@angular/common`: Common Angular directives and pipes
+- `@angular/forms`: Form handling and validation
+- `@angular/router`: Routing and navigation
+- `rxjs`: Reactive programming library
+- `tailwindcss`: Utility-first CSS framework
+
+### Development Dependencies
+- `typescript`: Programming language
+- `vitest`: Unit testing framework
+- `prettier`: Code formatter
+- `postcss`: CSS processing
+
+## 📝 Development Notes
+
+- The application uses standalone components, eliminating the need for NgModule declarations
+- Tailwind CSS provides responsive design utilities
+- Services are organized by feature (customer, medicine, order, cart)
+- All components include TypeScript interfaces and type safety
+- The application is fully responsive and mobile-optimized
+
+## 🤝 Contributing
+
+Guidelines for contributing to this project:
+1. Create feature branches from main
+2. Write tests for new features
+3. Follow the existing code structure and naming conventions
+4. Ensure all tests pass before submitting a pull request
+5. Use Prettier for code formatting
+
+## 📄 License
+
+This project is private and proprietary to Vonome.
+
+---
+
+For more information about Angular, visit the [Angular Documentation](https://angular.io/docs).
 
 ```bash
 ng e2e

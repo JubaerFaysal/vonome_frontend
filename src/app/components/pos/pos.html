@@ -7,24 +7,21 @@
        [class.hidden]="showCart && isMobile()">
 
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200 p-3 sm:p-4 z-10 shrink-0">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center space-x-3">
-          <div class="bg-primary-500 text-white p-1.5 sm:p-2 rounded-lg shadow-lg shadow-primary-500/30">
-            <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-2 z-10 shrink-0">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center space-x-2">
+          <div class="bg-primary-500 text-white p-1 rounded">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
             </svg>
           </div>
-          <div>
-            <h1 class="text-lg sm:text-2xl font-bold text-gray-800">Pharmacy POS</h1>
-            <p class="text-xs text-gray-500 hidden sm:block">{{ currentDate | date:'medium' }}</p>
-          </div>
+          <h1 class="text-lg font-bold text-gray-900">Pharmacy POS</h1>
         </div>
 
         <!-- Mobile cart toggle -->
-        <button class="lg:hidden relative p-2 bg-primary-500 text-white rounded-xl shadow-lg"
+        <button class="lg:hidden relative p-2 bg-primary-500 text-white rounded-lg"
                 (click)="showCart = true">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
           <span *ngIf="totals.itemCount > 0"
@@ -35,29 +32,29 @@
       </div>
 
       <!-- Search & Filters -->
-      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+      <div class="flex flex-col sm:flex-row gap-2">
         <div class="relative flex-1">
           <input
             type="text"
             [(ngModel)]="searchQuery"
             (input)="onSearch()"
-            placeholder="Search by name, generic, barcode…"
-            class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+            placeholder="Search medicine..."
+            class="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-          <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
         </div>
         <div class="flex gap-2">
           <select [(ngModel)]="selectedFilter" (change)="loadMedicines()"
-            class="flex-1 sm:flex-none px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-sm sm:min-w-[130px]">
+            class="px-2 py-1.5 border border-gray-200 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
             <option value="all">All</option>
             <option value="in-stock">In Stock</option>
             <option value="out-of-stock">Out of Stock</option>
             <option value="discount">Discount</option>
           </select>
           <select [(ngModel)]="selectedBrand" (change)="loadMedicines()"
-            class="flex-1 sm:flex-none px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-sm sm:min-w-[130px]">
+            class="px-2 py-1.5 border border-gray-200 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
             <option value="">All Brands</option>
             <option *ngFor="let brand of brands" [value]="brand">{{ brand }}</option>
           </select>
@@ -222,20 +219,20 @@
     <div class="flex-1 min-h-0 overflow-y-auto">
       <table class="w-full text-left border-collapse">
         <thead class="sticky top-0 bg-gray-50 z-10">
-          <tr class="border-b border-gray-200">
-            <th class="py-2 px-3 text-[11px] font-semibold text-gray-500">Product</th>
-            <th class="py-2 px-1 text-[11px] font-semibold text-gray-500 text-center hidden sm:table-cell">Unit</th>
-            <th class="py-2 px-1 text-[11px] font-semibold text-gray-500 text-center">Price</th>
-            <th class="py-2 px-1 text-[11px] font-semibold text-gray-500 text-center">Qty</th>
-            <th class="py-2 px-1 text-[11px] font-semibold text-gray-500 text-center">Disc%</th>
-            <th class="py-2 px-3 text-[11px] font-semibold text-gray-500 text-right">Total</th>
-            <th class="py-2 pr-2"></th>
+          <tr class="border-b-2 border-gray-300">
+            <th class="py-2.5 px-3 text-xs font-semibold text-gray-600 border-r border-gray-200">Product</th>
+            <th class="py-2.5 px-1 text-xs font-semibold text-gray-600 text-center hidden sm:table-cell border-r border-gray-200">Unit</th>
+            <th class="py-2.5 px-1 text-xs font-semibold text-gray-600 text-center border-r border-gray-200">Price</th>
+            <th class="py-2.5 px-1 text-xs font-semibold text-gray-600 text-center border-r border-gray-200">Qty</th>
+            <th class="py-2.5 px-1 text-xs font-semibold text-gray-600 text-center border-r border-gray-200">Disc%</th>
+            <th class="py-2.5 px-3 text-xs font-semibold text-gray-600 text-right border-r border-gray-200">Total</th>
+            <th class="py-2.5 pr-2"></th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of cartItems; trackBy: trackByCartItem"
-              class="border-b border-gray-100 hover:bg-gray-50/80 transition-colors">
-            <td class="py-2.5 px-3 max-w-[100px]">
+              class="border-b border-gray-300 hover:bg-gray-50/80 transition-colors">
+            <td class="py-2.5 px-3 max-w-[110px]">
               <span class="font-medium text-gray-800 text-xs leading-tight line-clamp-2">{{ item.medicine.name }}</span>
             </td>
             <td class="py-2.5 px-1 text-center hidden sm:table-cell">
@@ -339,16 +336,16 @@
 
         <!-- Discount button -->
         <button (click)="applyCartDiscount()"
-          class="w-12 h-12 sm:w-14 sm:h-14 bg-gray-500 hover:bg-gray-600 text-white rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-md shrink-0"
+          class="w-9 h-9 sm:w-10 sm:h-10 bg-gray-500 hover:bg-gray-600 text-white rounded-lg flex items-center justify-center transition-all active:scale-95 shadow-md shrink-0"
           title="Apply cart discount">
-          <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
           </svg>
         </button>
 
         <!-- Clear button -->
         <button *ngIf="cartItems.length > 0" (click)="resetCart()"
-          class="w-12 h-12 sm:w-14 sm:h-14 bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 rounded-2xl flex items-center justify-center transition-all active:scale-95 shrink-0"
+          class="w-9 h-9 sm:w-10 sm:h-10 bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 rounded-lg flex items-center justify-center transition-all active:scale-95 shrink-0"
           title="Clear cart">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -358,7 +355,7 @@
         <!-- Checkout -->
         <button (click)="checkout()"
           [disabled]="cartItems.length === 0"
-          class="flex-1 h-12 sm:h-14 bg-primary-500 hover:bg-primary-600 text-white rounded-2xl font-bold text-sm sm:text-base disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30 transition-all active:scale-95">
+          class="flex-1 h-9 sm:h-10 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-bold text-xs sm:text-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30 transition-all active:scale-95">
           Payment
           <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>

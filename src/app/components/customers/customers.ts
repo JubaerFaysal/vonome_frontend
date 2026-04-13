@@ -17,6 +17,7 @@ export class CustomersComponent implements OnInit {
   showAddModal = false;
   isEditing = false;
   currentCustomer: Partial<Customer> = {};
+  error = '';
 
   constructor(private customerService: CustomerService, private cdr: ChangeDetectorRef) {}
 
@@ -53,7 +54,9 @@ export class CustomersComponent implements OnInit {
 
   openEditModal(customer: Customer): void {
     this.isEditing = true;
-    this.currentCustomer = { ...customer };
+    // Strip +880 prefix from phone for display
+    const phone = customer.phone?.replace(/^\+880/, '') || '';
+    this.currentCustomer = { ...customer, phone };
     this.showAddModal = true;
   }
 
@@ -63,14 +66,64 @@ export class CustomersComponent implements OnInit {
 
   saveCustomer(): void {
     if (this.isEditing && this.currentCustomer.id) {
-      this.customerService.updateCustomer(this.currentCustomer.id.toString(), this.currentCustomer).subscribe(() => {
-        this.loadCustomers();
-        this.closeModal();
+      const phone = this.currentCustomer.phone;
+      // Ensure phone has +880 prefix
+      const formattedPhone = phone && !phone.startsWith('+880') ? `+880${phone}` : phone;
+      
+      const updateData = {
+        type: this.currentCustomer.type,
+        title: this.currentCustomer.title,
+        name: this.currentCustomer.name,
+        displayName: this.currentCustomer.displayName,
+        phone: formattedPhone,
+        email: this.currentCustomer.email || '',
+        billingAddress: this.currentCustomer.billingAddress || '',
+      };
+
+      console.log('Updating customer with ID:', this.currentCustomer.id);
+      console.log('Update payload:', updateData);
+
+      this.customerService.updateCustomer(this.currentCustomer.id.toString(), updateData).subscribe({
+        next: () => {
+          console.log('Customer updated successfully');
+          this.loadCustomers();
+          this.closeModal();
+          this.error = '';
+        },
+        error: (err) => {
+          console.error('Update failed:', err);
+          this.error = err?.message || 'Failed to update customer';
+          this.cdr.markForCheck();
+        }
       });
     } else {
-      this.customerService.createCustomer(this.currentCustomer).subscribe(() => {
-        this.loadCustomers();
-        this.closeModal();
+      const phone = this.currentCustomer.phone;
+      const formattedPhone = phone && !phone.startsWith('+880') ? `+880${phone}` : phone;
+      
+      const createData = {
+        type: this.currentCustomer.type,
+        title: this.currentCustomer.title,
+        name: this.currentCustomer.name,
+        displayName: this.currentCustomer.displayName,
+        phone: formattedPhone,
+        email: this.currentCustomer.email || '',
+        billingAddress: this.currentCustomer.billingAddress || '',
+      };
+
+      console.log('Creating customer with payload:', createData);
+
+      this.customerService.createCustomer(createData).subscribe({
+        next: () => {
+          console.log('Customer created successfully');
+          this.loadCustomers();
+          this.closeModal();
+          this.error = '';
+        },
+        error: (err) => {
+          console.error('Create failed:', err);
+          this.error = err?.message || 'Failed to create customer';
+          this.cdr.markForCheck();
+        }
       });
     }
   }
