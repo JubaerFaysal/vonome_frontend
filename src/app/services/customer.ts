@@ -1,33 +1,50 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../environment/environment';
 import { Customer } from '../models/customer.model';
-@Injectable({
-  providedIn: 'root'
-})
+
+export interface CustomerListResponse {
+  data: Customer[];
+  meta: { page: number; limit: number; total: number; totalPages: number };
+}
+
+@Injectable({ providedIn: 'root' })
 export class CustomerService {
-  private apiUrl = `${environment.apiUrl}/customers`;
+  private readonly apiUrl = `${environment.apiUrl}/customers`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
-  getCustomers(page: number = 1, limit: number = 100): Observable<{ customers: Customer[]; total: number }> {
-    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}?page=${page}&limit=${limit}`);
+  getCustomers(page = 1, limit = 100): Observable<CustomerListResponse> {
+    const params = new HttpParams().set('page', String(page)).set('limit', String(limit));
+    return this.http.get<CustomerListResponse>(this.apiUrl, { params }).pipe(
+      catchError(err => throwError(() => new Error(err?.error?.message ?? 'Failed to load customers')))
+    );
   }
 
   searchCustomers(query: string): Observable<Customer[]> {
-    return this.http.get<Customer[]>(`${this.apiUrl}/search?q=${encodeURIComponent(query)}`);
+    const params = new HttpParams().set('q', query);
+    return this.http.get<Customer[]>(`${this.apiUrl}/search`, { params }).pipe(
+      catchError(err => throwError(() => new Error(err?.error?.message ?? 'Search failed')))
+    );
   }
 
   getCustomer(id: string): Observable<Customer> {
-    return this.http.get<Customer>(`${this.apiUrl}/${id}`);
+    return this.http.get<Customer>(`${this.apiUrl}/${id}`).pipe(
+      catchError(err => throwError(() => new Error(err?.error?.message ?? 'Failed to load customer')))
+    );
   }
 
   createCustomer(customer: Partial<Customer>): Observable<Customer> {
-    return this.http.post<Customer>(this.apiUrl, customer);
+    return this.http.post<Customer>(this.apiUrl, customer).pipe(
+      catchError(err => throwError(() => new Error(err?.error?.message ?? 'Failed to create customer')))
+    );
   }
 
   updateCustomer(id: string, customer: Partial<Customer>): Observable<Customer> {
-    return this.http.patch<Customer>(`${this.apiUrl}/${id}`, customer);
+    return this.http.patch<Customer>(`${this.apiUrl}/${id}`, customer).pipe(
+      catchError(err => throwError(() => new Error(err?.error?.message ?? 'Failed to update customer')))
+    );
   }
 }

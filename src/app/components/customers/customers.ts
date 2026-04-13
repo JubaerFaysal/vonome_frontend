@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Customer } from '../../models/customer.model';
 import { CustomerService } from '../../services/customer';
@@ -18,7 +18,7 @@ export class CustomersComponent implements OnInit {
   isEditing = false;
   currentCustomer: Partial<Customer> = {};
 
-  constructor(private customerService: CustomerService) {}
+  constructor(private customerService: CustomerService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadCustomers();
@@ -28,12 +28,16 @@ export class CustomersComponent implements OnInit {
     this.loading = true;
     this.customerService.getCustomers(1, 50).subscribe({
       next: (data: any) => {
-        this.customers = data.customers || data.data;
+        console.log('API Response:', data);
+        this.customers = data.data || [];
         this.loading = false;
+        this.cdr.markForCheck();
+        console.log('Loaded customers:', this.customers);
       },
       error: (err) => {
         console.error('Failed to load customers', err);
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

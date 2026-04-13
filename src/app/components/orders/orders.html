@@ -1,50 +1,112 @@
-<div class="h-full flex flex-col p-8">
-  <div class="flex items-center justify-between mb-8">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-800">Order History</h1>
-      <p class="text-gray-500 mt-1">View recent transactions and invoices</p>
+<!-- Container with proper height and overflow -->
+<div class="h-screen flex flex-col overflow-hidden bg-gray-50">
+
+  <!-- Sticky Header -->
+  <div class="sticky top-0 z-20 bg-white shadow-sm border-b border-gray-200 p-4 space-y-3 shrink-0">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Order History</h1>
+        <p class="text-gray-500 text-xs sm:text-sm mt-0.5">View and manage all orders</p>
+      </div>
+      <button (click)="loadOrders()"
+              class="p-2 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+              title="Refresh orders"
+              [disabled]="loading">
+        <svg class="w-5 h-5" [class.animate-spin]="loading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="grid grid-cols-2 gap-2 sm:gap-3">
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Status</label>
+        <select [(ngModel)]="statusFilter" (change)="onStatusChange()"
+                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm transition-shadow">
+          <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Customer ID</label>
+        <input type="text" [(ngModel)]="customerIdFilter" (input)="onCustomerIdInput()"
+               placeholder="Search by customer ID…"
+               class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-shadow">
+      </div>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-    <!-- List Column -->
-    <div class="glass-panel flex flex-col rounded-2xl overflow-hidden shadow-sm" [class.lg:col-span-2]="selectedOrder" [class.lg:col-span-3]="!selectedOrder">
-      <div class="flex-1 overflow-auto custom-scrollbar">
-        <table class="w-full text-left border-collapse">
-          <thead class="sticky top-0 bg-gray-50/90 backdrop-blur-md z-10 shadow-sm border-b border-gray-200">
-            <tr>
-              <th class="py-4 px-6 font-semibold text-gray-600 text-sm">Order ID</th>
-              <th class="py-4 px-6 font-semibold text-gray-600 text-sm">Date</th>
-              <th class="py-4 px-6 font-semibold text-gray-600 text-sm">Customer</th>
-              <th class="py-4 px-6 font-semibold text-gray-600 text-sm">Status</th>
-              <th class="py-4 px-6 font-semibold text-gray-600 text-sm text-right">Total Amount</th>
+  <!-- Error banner -->
+  <div *ngIf="errorMessage" class="mx-4 mt-3 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-2 shrink-0">
+    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    {{ errorMessage }}
+    <button class="ml-auto text-red-500 hover:text-red-700 underline text-xs" (click)="loadOrders()">Retry</button>
+  </div>
+
+  <!-- Scrollable Content Area -->
+  <div class="flex flex-1 min-h-0 overflow-y-auto">
+
+    <!-- Orders list -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-0">
+      <div class="flex-1 min-h-0 overflow-y-auto border-r border-gray-200">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="sticky top-0 bg-gray-50 z-10">
+            <tr class="border-b border-gray-200">
+              <th class="px-4 py-3 font-semibold text-gray-700">Order ID</th>
+              <th class="px-4 py-3 font-semibold text-gray-700">Date</th>
+              <th class="px-4 py-3 font-semibold text-gray-700 hidden sm:table-cell">Customer</th>
+              <th class="px-4 py-3 font-semibold text-gray-700">Status</th>
+              <th class="px-4 py-3 font-semibold text-gray-700 text-right">Amount</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngIf="loading" class="animate-pulse">
-              <td colspan="5" class="py-12 text-center text-gray-400">Loading orders...</td>
-            </tr>
-            <tr *ngIf="!loading && orders.length === 0">
-              <td colspan="5" class="py-16 text-center text-gray-400">No orders found.</td>
-            </tr>
-            <tr *ngFor="let o of orders" 
-                (click)="viewOrder(o)"
-                [class.bg-indigo-50]="selectedOrder?.id === o.id"
-                class="border-b border-gray-100/50 hover:bg-gray-50 cursor-pointer transition-colors">
-              <td class="py-4 px-6 font-medium text-gray-700">#{{ o.id }}</td>
-              <td class="py-4 px-6 text-sm text-gray-600">{{ o.createdAt | date:'short' }}</td>
-              <td class="py-4 px-6">
-                <div class="font-medium text-gray-800">{{ o.customer?.displayName || 'Walk-in Customer' }}</div>
-                <div class="text-xs text-gray-500">{{ o.customer?.phone }}</div>
+            <!-- Loading -->
+            <tr *ngIf="loading">
+              <td colspan="5" class="px-4 py-12 text-center text-gray-400">
+                <div class="flex flex-col items-center gap-2">
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                  <span class="text-sm">Loading orders…</span>
+                </div>
               </td>
-              <td class="py-4 px-6">
-                <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize"
-                      [class]="o.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'">
-                  {{ o.status }}
+            </tr>
+
+            <!-- Empty -->
+            <tr *ngIf="!loading && orders.length === 0 && !errorMessage">
+              <td colspan="5" class="px-4 py-16 text-center text-gray-400">
+                <div class="flex flex-col items-center gap-2">
+                  <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <span class="text-sm">No orders found</span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Rows -->
+            <tr *ngFor="let order of orders; trackBy: trackByOrderId"
+                (click)="viewOrder(order)"
+                class="border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer group"
+                [class.bg-blue-50]="selectedOrder?.id === order.id"
+                [class.border-l-2]="selectedOrder?.id === order.id"
+                [class.border-l-blue-500]="selectedOrder?.id === order.id">
+              <td class="px-4 py-3 font-semibold text-gray-800 group-hover:text-blue-600">
+                #{{ order.id }}
+              </td>
+              <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">
+                {{ order.createdAt | date:'MMM d, h:mm a' }}
+              </td>
+              <td class="px-4 py-3 hidden sm:table-cell">
+                <div class="font-medium text-gray-800 text-sm">{{ order.customer?.displayName || 'Walk-in' }}</div>
+                <div class="text-xs text-gray-500">{{ order.customer?.phone }}</div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                      [ngClass]="getStatusClass(order.status)">
+                  {{ order.status | uppercase }}
                 </span>
               </td>
-              <td class="py-4 px-6 text-right font-bold text-gray-900">
-                Tk. {{ o.totalAmount }}
+              <td class="px-4 py-3 text-right font-semibold text-gray-900 whitespace-nowrap">
+                Tk. {{ order.totalAmount | number:'1.2-2' }}
               </td>
             </tr>
           </tbody>
@@ -52,70 +114,106 @@
       </div>
     </div>
 
-    <!-- Detail Column -->
-    <div *ngIf="selectedOrder" class="glass-panel flex flex-col rounded-2xl overflow-hidden shadow-sm animate-fade-in lg:col-span-1">
-      <div class="p-6 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
+    <!-- Order detail panel (desktop side panel, mobile overlay) -->
+    <div *ngIf="selectedOrder"
+         class="fixed inset-0 z-30 sm:static sm:inset-auto sm:z-auto sm:w-[400px] lg:w-[420px]
+                bg-white shadow-xl flex flex-col min-h-0 border-l border-gray-200 overflow-hidden">
+
+      <!-- Detail header -->
+      <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex justify-between items-center shrink-0">
         <div>
-          <h2 class="text-xl font-bold text-gray-800">Order #{{ selectedOrder.id }}</h2>
-          <p class="text-sm text-gray-500">{{ selectedOrder.createdAt | date:'medium' }}</p>
+          <h2 class="text-base sm:text-lg font-bold text-gray-900">Order #{{ selectedOrder.id }}</h2>
+          <p class="text-xs text-gray-500 mt-0.5">{{ selectedOrder.createdAt | date:'medium' }}</p>
         </div>
-        <button (click)="closeOrderView()" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors">
-          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <button (click)="closeOrderView()"
+                class="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-white rounded-lg transition-colors"
+                aria-label="Close order detail">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
         </button>
       </div>
 
-      <div class="p-6 border-b border-gray-100">
-        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Customer Info</h3>
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-            {{ selectedOrder.customer?.displayName?.charAt(0) || 'W' }}
-          </div>
-          <div class="ml-3">
-            <div class="font-medium text-gray-800">{{ selectedOrder.customer?.displayName || 'Walk-in Customer' }}</div>
-            <div class="text-sm text-gray-500">{{ selectedOrder.customer?.phone || 'No phone' }}</div>
-          </div>
-        </div>
-      </div>
+      <!-- Scrollable detail content -->
+      <div class="flex-1 min-h-0 overflow-y-auto">
 
-      <div class="flex-1 overflow-auto p-6 custom-scrollbar">
-        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Items ({{ selectedOrder.items.length }})</h3>
-        <div class="space-y-4">
-          <div *ngFor="let item of selectedOrder.items" class="flex justify-between items-start">
-            <div>
-              <div class="font-medium text-gray-800">{{ item.medicineName }}</div>
-              <div class="text-sm text-gray-500">{{ item.quantity }} x Tk. {{ item.unitPrice }}</div>
+        <!-- Customer -->
+        <div class="p-4 border-b border-gray-100">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Customer</h3>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">
+              {{ (selectedOrder.customer?.displayName || 'W').charAt(0) }}
             </div>
-            <div class="font-semibold text-gray-900">Tk. {{ item.subtotal }}</div>
+            <div class="min-w-0">
+              <div class="font-medium text-gray-900 text-sm">{{ selectedOrder.customer?.displayName || 'Walk-in' }}</div>
+              <div class="text-xs text-gray-500">{{ selectedOrder.customer?.phone }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div class="p-4 border-b border-gray-100">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Items ({{ selectedOrder.items.length }})</h3>
+          <div class="space-y-2.5">
+            <div *ngFor="let item of selectedOrder.items" class="flex justify-between items-start text-xs">
+              <div class="flex-1 min-w-0 pr-2">
+                <div class="font-medium text-gray-900 truncate">{{ item.medicineName }}</div>
+                <div class="text-gray-500">{{ item.quantity }} × Tk. {{ item.unitPrice | number:'1.2-2' }}</div>
+              </div>
+              <div class="font-semibold text-gray-900 whitespace-nowrap">Tk. {{ item.subtotal | number:'1.2-2' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Totals -->
+        <div class="p-3 bg-gray-50 space-y-2 text-xs border-b border-gray-100">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Subtotal</span>
+            <span class="font-medium text-gray-900">Tk. {{ selectedOrder.subtotal | number:'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">VAT</span>
+            <span class="font-medium text-gray-900">Tk. {{ selectedOrder.vatAmount | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <!-- Payment info -->
+        <div class="p-4 space-y-2 text-xs">
+          <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+            <span class="text-gray-500">Status</span>
+            <span class="font-semibold uppercase"
+                  [ngClass]="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span>
+          </div>
+          <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+            <span class="text-gray-500">Payment Method</span>
+            <span class="font-semibold text-gray-900 capitalize">{{ selectedOrder.paymentMethod || 'Unpaid' }}</span>
+          </div>
+          <div class="flex justify-between items-center p-2.5 bg-green-50 rounded-lg border border-green-200">
+            <span class="text-gray-500">Paid Amount</span>
+            <span class="font-semibold text-green-700">Tk. {{ selectedOrder.paidAmount | number:'1.2-2' }}</span>
+          </div>
+          <div *ngIf="selectedOrder.dueAmount > 0"
+               class="flex justify-between items-center p-2.5 bg-red-50 rounded-lg border border-red-200">
+            <span class="text-gray-500">Due Amount</span>
+            <span class="font-semibold text-red-700">Tk. {{ selectedOrder.dueAmount | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>
 
-      <div class="p-6 bg-gray-50/80 border-t border-gray-200">
-        <div class="space-y-2 text-sm text-gray-600">
-          <div class="flex justify-between">
-            <span>Subtotal</span>
-            <span class="font-medium text-gray-800">Tk. {{ selectedOrder.subtotal }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span>VAT</span>
-            <span class="font-medium text-gray-800">Tk. {{ selectedOrder.vatAmount }}</span>
-          </div>
-          <div class="flex justify-between border-t border-gray-200 mt-3 pt-3">
-            <span class="font-bold text-gray-800">Total</span>
-            <span class="font-bold text-xl text-primary-600">Tk. {{ selectedOrder.totalAmount }}</span>
-          </div>
+      <!-- Sticky total + print -->
+      <div class="p-4 bg-white border-t border-gray-200 shrink-0">
+        <div class="flex justify-between items-center mb-3">
+          <span class="font-semibold text-gray-900">Total</span>
+          <span class="text-xl font-bold text-blue-600">Tk. {{ selectedOrder.totalAmount | number:'1.2-2' }}</span>
         </div>
-
-        <div class="mt-6 flex flex-col space-y-3">
-          <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl">
-             <span class="text-sm font-medium text-gray-500">Payment</span>
-             <span class="text-sm font-bold text-gray-800 capitalize">{{ selectedOrder.paymentMethod || 'Unpaid' }}</span>
-          </div>
-          <button class="w-full py-3 bg-white border border-gray-300 hover:bg-gray-50 rounded-xl font-medium transition-colors text-sm shadow-sm">
-             Print Receipt
-          </button>
-        </div>
+        <button class="w-full py-2.5 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+          </svg>
+          Print Receipt
+        </button>
       </div>
     </div>
+
   </div>
 </div>

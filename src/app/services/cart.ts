@@ -1,37 +1,94 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Medicine } from '../models/medicine.model';
 import { CartItem, OrderItem } from '../models/order.model';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class CartService {
-  private items: CartItem[] = [];
-  private itemsSubject = new BehaviorSubject<CartItem[]>([]);
-  private currentOrderId: string | null = null;
-  
-  items$ = this.itemsSubject.asObservable();
+export interface CartTotals {
+  subtotal: number;
+  vatAmount: number;
+  total: number;
+  itemCount: number;
+  items: number;
+}
+
+const CART_STORAGE_KEY = 'vonome_cart';
+const VAT_RATE = 0.10;
+
+@Injectable({ providedIn: 'root' })
+export class CartService implements OnDestroy {
+  private readonly itemsSubject = new BehaviorSubject<CartItem[]>([]);
+
+  readonly items$: Observable<CartItem[]> = this.itemsSubject.asObservable();
+
+  readonly totals$: Observable<CartTotals> = this.items$.pipe(
+    map(items => this.computeTotals(items))
+  );
+
+  readonly isEmpty$: Observable<boolean> = this.items$.pipe(
+    map(items => items.length === 0)
+  );
 
   constructor() {
-    // Load from localStorage on init
-    const saved = localStorage.getItem('cart');
-    if (saved) {
-      this.items = JSON.parse(saved);
-      this.itemsSubject.next([...this.items]);
+    this.restoreFromStorage();
+  }
+
+  ngOnDestroy(): void {
+    this.itemsSubject.complete();
+  }
+
+  private restoreFromStorage(): void {
+    try {
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        const parsed: CartItem[] = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          this.itemsSubject.next(parsed);
+        }
+      }
+    } catch {
+      localStorage.removeItem(CART_STORAGE_KEY);
     }
   }
 
-  private saveToStorage() {
-    localStorage.setItem('cart', JSON.stringify(this.items));
+  private persist(items: CartItem[]): void {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // Storage quota exceeded or unavailable — fail silently
+    }
   }
 
-  addToCart(medicine: Medicine, quantity: number = 1) {
-    const existing = this.items.find(item => item.medicine.id === medicine.id);
-    
-    if (existing) {
-      existing.quantity += quantity;
-      this.calculateItemSubtotal(existing);
+  private emit(items: CartItem[]): void {
+    this.itemsSubject.next(items);
+    this.persist(items);
+  }
+
+  private computeSubtotal(item: CartItem): number {
+    const base = item.unitPrice * item.quantity;
+    return base * (1 - (item.discountPercent ?? 0) / 100);
+  }
+
+  private computeTotals(items: CartItem[]): CartTotals {
+    const subtotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+    const vatAmount = subtotal * VAT_RATE;
+    return {
+      subtotal,
+      vatAmount,
+      total: subtotal + vatAmount,
+      itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
+      items: items.length,
+    };
+  }
+
+  addToCart(medicine: Medicine, quantity = 1): void {
+    const current = [...this.itemsSubject.value];
+    const idx = current.findIndex(i => i.medicine.id === medicine.id);
+
+    if (idx >= 0) {
+      const updated = { ...current[idx], quantity: current[idx].quantity + quantity };
+      updated.subtotal = this.computeSubtotal(updated);
+      current[idx] = updated;
     } else {
       const newItem: CartItem = {
         medicine,
@@ -40,86 +97,59 @@ export class CartService {
         quantity,
         discountPercent: 0,
         unitPrice: medicine.discountedPrice,
-        subtotal: medicine.discountedPrice * quantity
+        subtotal: medicine.discountedPrice * quantity,
       };
-      this.items.push(newItem);
+      current.push(newItem);
     }
-    
-    this.itemsSubject.next([...this.items]);
-    this.saveToStorage();
+
+    this.emit(current);
   }
 
-  removeFromCart(medicineId: string) {
-    this.items = this.items.filter(item => item.medicine.id !== medicineId);
-    this.itemsSubject.next([...this.items]);
-    this.saveToStorage();
+  removeFromCart(medicineId: string): void {
+    this.emit(this.itemsSubject.value.filter(i => i.medicine.id !== medicineId));
   }
 
-  updateQuantity(medicineId: string, quantity: number) {
-    const item = this.items.find(i => i.medicine.id === medicineId);
-    if (item && quantity > 0) {
-      item.quantity = quantity;
-      this.calculateItemSubtotal(item);
-      this.itemsSubject.next([...this.items]);
-      this.saveToStorage();
+  updateQuantity(medicineId: string, quantity: number): void {
+    if (quantity <= 0) {
+      this.removeFromCart(medicineId);
+      return;
     }
+    const current = this.itemsSubject.value.map(i => {
+      if (i.medicine.id !== medicineId) return i;
+      const updated = { ...i, quantity };
+      updated.subtotal = this.computeSubtotal(updated);
+      return updated;
+    });
+    this.emit(current);
   }
 
-  updateDiscount(medicineId: string, discountPercent: number) {
-    const item = this.items.find(i => i.medicine.id === medicineId);
-    if (item) {
-      item.discountPercent = discountPercent;
-      this.calculateItemSubtotal(item);
-      this.itemsSubject.next([...this.items]);
-      this.saveToStorage();
-    }
+  updateDiscount(medicineId: string, discountPercent: number): void {
+    const clamped = Math.min(100, Math.max(0, discountPercent));
+    const current = this.itemsSubject.value.map(i => {
+      if (i.medicine.id !== medicineId) return i;
+      const updated = { ...i, discountPercent: clamped };
+      updated.subtotal = this.computeSubtotal(updated);
+      return updated;
+    });
+    this.emit(current);
   }
 
-  private calculateItemSubtotal(item: CartItem) {
-    const basePrice = item.unitPrice * item.quantity;
-    item.subtotal = basePrice * (1 - item.discountPercent / 100);
-  }
-
-  clearCart() {
-    this.items = [];
-    this.currentOrderId = null;
-    this.itemsSubject.next([]);
-    localStorage.removeItem('cart');
+  clearCart(): void {
+    this.emit([]);
+    localStorage.removeItem(CART_STORAGE_KEY);
   }
 
   getCartItems(): CartItem[] {
-    return this.items;
+    return this.itemsSubject.value;
   }
 
-  getTotals() {
-    const subtotal = this.items.reduce((sum, item) => sum + item.subtotal, 0);
-    const vatAmount = subtotal * 0.10; // 10% VAT
-    const total = subtotal + vatAmount;
-    return { 
-      subtotal, 
-      vatAmount, 
-      total, 
-      itemCount: this.items.reduce((sum, item) => sum + item.quantity, 0),
-      items: this.items.length 
-    };
-  }
-
-  setCurrentOrderId(orderId: string) {
-    this.currentOrderId = orderId;
-  }
-
-  getCurrentOrderId(): string | null {
-    return this.currentOrderId;
+  getTotals(): CartTotals {
+    return this.computeTotals(this.itemsSubject.value);
   }
 
   toOrderItems(): OrderItem[] {
-    return this.items.map(item => ({
-      medicineId: item.medicineId,
-      medicineName: item.medicineName,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      discountPercent: item.discountPercent,
-      subtotal: item.subtotal
+    return this.itemsSubject.value.map(({ medicineId, medicineName, quantity, unitPrice, discountPercent, subtotal }) => ({
+      medicineId, medicineName, quantity, unitPrice, discountPercent, subtotal,
     }));
   }
 }

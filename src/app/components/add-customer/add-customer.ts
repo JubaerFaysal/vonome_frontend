@@ -1,70 +1,89 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  Output,
+} from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { Customer } from '../../models/customer.model';
 import { CustomerService } from '../../services/customer';
 
 @Component({
   selector: 'app-add-customer',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './add-customer.html'
+  templateUrl: './add-customer.html',
 })
-export class AddCustomerComponent {
-  customerForm: FormGroup;
-  loading = false;
+export class AddCustomerComponent implements OnDestroy {
+  @Output() readonly close = new EventEmitter<void>();
+  @Output() readonly saved = new EventEmitter<Customer>();
 
-  @Output() close = new EventEmitter<void>();
-  @Output() saved = new EventEmitter<Customer>();
+  readonly customerForm: FormGroup;
+  loading = false;
+  serverError = '';
+
+  private readonly subs = new Subscription();
 
   constructor(
-    private fb: FormBuilder,
-    private customerService: CustomerService
+    private readonly fb: FormBuilder,
+    private readonly customerService: CustomerService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.customerForm = this.fb.group({
       type: ['individual', Validators.required],
       title: ['Mr.', Validators.required],
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      displayName: ['', [Validators.required, Validators.minLength(2)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
+      displayName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9]{10,11}$/)]],
-      email: ['', [Validators.email]],
-      billingAddress: ['']
+      email: ['', [Validators.email, Validators.maxLength(100)]],
+      billingAddress: ['', Validators.maxLength(200)],
     });
   }
 
-  get f() { return this.customerForm.controls; }
-
-  onBackdropClick(event: MouseEvent) {
-    if (event.target === event.currentTarget) {
-      this.close.emit();
-    }
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
-  onSubmit() {
+  get f(): Record<string, AbstractControl> {
+    return this.customerForm.controls;
+  }
+
+  hasError(field: string): boolean {
+    const ctrl = this.f[field];
+    return !!(ctrl?.touched && ctrl?.errors);
+  }
+
+  onBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.close.emit();
+  }
+
+  onSubmit(): void {
     if (this.customerForm.invalid) {
-      Object.keys(this.customerForm.controls).forEach(key => {
-        this.customerForm.get(key)?.markAsTouched();
-      });
+      Object.values(this.customerForm.controls).forEach(c => c.markAsTouched());
       return;
     }
-    
+
     this.loading = true;
-    const formValue = this.customerForm.value;
-    const data = {
-      ...formValue,
-      phone: '+880' + formValue.phone
-    };
-    
-    this.customerService.createCustomer(data).subscribe({
-      next: (customer: Customer) => {
-        this.saved.emit(customer);
-        this.loading = false;
-      },
-      error: (err: any) => {
-        console.error('Error creating customer:', err);
-        alert(err.error?.message || 'Failed to create customer. Please try again.');
-        this.loading = false;
-      }
-    });
+    this.serverError = '';
+    const { phone, ...rest } = this.customerForm.value;
+
+    this.subs.add(
+      this.customerService.createCustomer({ ...rest, phone: `+880${phone}` }).subscribe({
+        next: customer => {
+          this.loading = false;
+          this.saved.emit(customer);
+        },
+        error: (err: Error) => {
+          this.serverError = err.message;
+          this.loading = false;
+          this.cdr.markForCheck();
+        },
+      })
+    );
   }
 }

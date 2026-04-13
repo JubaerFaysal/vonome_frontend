@@ -63,16 +63,51 @@ export class MedicinesComponent implements OnInit {
   }
 
   saveMedicine(): void {
+    // Filter out computed fields that shouldn't be sent to API
+    const payload = this.sanitizePayload(this.currentMedicine);
+
+    if (!payload.name || !payload.generic || !payload.barcode || !payload.brand) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
     if (this.isEditing && this.currentMedicine.id) {
-      this.medicineService.updateMedicine(this.currentMedicine.id.toString(), this.currentMedicine).subscribe(() => {
-        this.loadMedicines();
-        this.closeModal();
+      this.medicineService.updateMedicine(this.currentMedicine.id.toString(), payload).subscribe({
+        next: () => {
+          this.loadMedicines();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Failed to update medicine', err);
+          alert(`Failed to update medicine: ${err.message}`);
+        }
       });
     } else {
-      this.medicineService.createMedicine(this.currentMedicine).subscribe(() => {
-        this.loadMedicines();
-        this.closeModal();
+      this.medicineService.createMedicine(payload).subscribe({
+        next: () => {
+          this.loadMedicines();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Failed to create medicine', err);
+          alert(`Failed to create medicine: ${err.message}`);
+        }
       });
     }
+  }
+
+  private sanitizePayload(medicine: Partial<Medicine>): Partial<Medicine> {
+    const { isInStock, discountedPrice, createdAt, updatedAt, ...payload } = medicine;
+    return {
+      name: payload.name,
+      generic: payload.generic,
+      barcode: payload.barcode,
+      brand: payload.brand,
+      price: payload.price,
+      stockQuantity: payload.stockQuantity,
+      isDiscounted: payload.isDiscounted,
+      discountPercent: payload.discountPercent,
+      imageUrl: payload.imageUrl ?? undefined
+    };
   }
 }

@@ -1,130 +1,136 @@
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm" (click)="onBackdropClick($event)">
-  <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all" (click)="$event.stopPropagation()">
-    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
-      <h2 class="text-xl font-bold text-gray-800">Add New Customer</h2>
-      <button (click)="close.emit()" class="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-200 rounded-full transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 backdrop-blur-sm"
+     (click)="onBackdropClick($event)">
+  <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[96vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="p-5 sm:p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl sticky top-0 z-10">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800">Add New Customer</h2>
+      <button (click)="close.emit()"
+              class="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+              aria-label="Close">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
 
-    <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
+    <!-- Server error -->
+    <div *ngIf="serverError" class="mx-5 mt-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start gap-2" role="alert">
+      <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {{ serverError }}
+    </div>
+
+    <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="p-5 sm:p-6 space-y-4" novalidate>
+
       <!-- Customer Type -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Customer type <span class="text-red-500">*</span></label>
-        <div class="flex space-x-6">
-          <label class="flex items-center cursor-pointer">
-            <input type="radio" formControlName="type" value="individual" class="w-4 h-4 text-primary-500 focus:ring-primary-500 border-gray-300">
-            <span class="ml-2 text-sm text-gray-700">Individual</span>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Customer type <span class="text-red-500">*</span>
+        </label>
+        <div class="flex gap-4 sm:gap-6">
+          <label class="flex items-center cursor-pointer gap-2">
+            <input type="radio" formControlName="type" value="individual"
+                   class="w-4 h-4 text-primary-500 focus:ring-primary-500 border-gray-300">
+            <span class="text-sm text-gray-700">Individual</span>
           </label>
-          <label class="flex items-center cursor-pointer">
-            <input type="radio" formControlName="type" value="business" class="w-4 h-4 text-primary-500 focus:ring-primary-500 border-gray-300">
-            <span class="ml-2 text-sm text-gray-700">Business</span>
+          <label class="flex items-center cursor-pointer gap-2">
+            <input type="radio" formControlName="type" value="business"
+                   class="w-4 h-4 text-primary-500 focus:ring-primary-500 border-gray-300">
+            <span class="text-sm text-gray-700">Business</span>
           </label>
         </div>
       </div>
 
-      <!-- Customer Name -->
+      <!-- Name -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Customer name <span class="text-red-500">*</span></label>
-        <div class="flex space-x-2">
-          <select formControlName="title" class="w-20 p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none bg-gray-50">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Customer name <span class="text-red-500">*</span>
+        </label>
+        <div class="flex gap-2">
+          <select formControlName="title"
+                  class="w-20 p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none bg-gray-50 text-sm">
             <option value="Mr.">Mr.</option>
             <option value="Mrs.">Mrs.</option>
             <option value="Ms.">Ms.</option>
             <option value="Dr.">Dr.</option>
           </select>
-          <input 
-            type="text" 
-            formControlName="name"
-            placeholder="Enter customer name"
-            class="flex-1 p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none"
-            [class.border-red-500]="f['name'].touched && f['name'].errors"
-          >
+          <input type="text" formControlName="name" placeholder="Full name"
+                 class="flex-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                 [class.border-red-400]="hasError('name')"
+                 [class.border-gray-200]="!hasError('name')"
+                 aria-label="Customer name">
         </div>
-        <div *ngIf="f['name'].touched && f['name'].errors" class="text-red-500 text-xs mt-1">
-          Name is required
-        </div>
+        <p *ngIf="hasError('name')" class="text-red-500 text-xs mt-1">Name is required (2–60 characters)</p>
       </div>
 
-      <!-- Display Name -->
+      <!-- Display name -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Display name <span class="text-red-500">*</span></label>
-        <input 
-          type="text" 
-          formControlName="displayName"
-          placeholder="Enter display name"
-          class="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none"
-          [class.border-red-500]="f['displayName'].touched && f['displayName'].errors"
-        >
-        <div *ngIf="f['displayName'].touched && f['displayName'].errors" class="text-red-500 text-xs mt-1">
-          Display name is required
-        </div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Display name <span class="text-red-500">*</span>
+        </label>
+        <input type="text" formControlName="displayName" placeholder="Display name"
+               class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+               [class.border-red-400]="hasError('displayName')"
+               [class.border-gray-200]="!hasError('displayName')">
+        <p *ngIf="hasError('displayName')" class="text-red-500 text-xs mt-1">Display name is required (2–60 characters)</p>
       </div>
 
       <!-- Phone -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Phone <span class="text-red-500">*</span></label>
-        <div class="flex space-x-2">
-          <div class="flex items-center px-3 bg-gray-100 border border-gray-200 rounded-lg">
-            <span class="text-lg mr-1">🇧🇩</span>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Phone <span class="text-red-500">*</span>
+        </label>
+        <div class="flex gap-2">
+          <div class="flex items-center px-3 bg-gray-100 border border-gray-200 rounded-lg shrink-0 gap-1">
+            <span class="text-base">🇧🇩</span>
             <span class="text-sm text-gray-600 font-medium">+880</span>
           </div>
-          <input 
-            type="tel" 
-            formControlName="phone"
-            placeholder="1XXXXXXXXX"
-            class="flex-1 p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none"
-            [class.border-red-500]="f['phone'].touched && f['phone'].errors"
-          >
+          <input type="tel" formControlName="phone" placeholder="1XXXXXXXXX"
+                 class="flex-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+                 [class.border-red-400]="hasError('phone')"
+                 [class.border-gray-200]="!hasError('phone')"
+                 maxlength="11"
+                 inputmode="numeric">
         </div>
-        <div *ngIf="f['phone'].touched && f['phone'].errors" class="text-red-500 text-xs mt-1">
-          Valid 10-11 digit phone number required
-        </div>
+        <p *ngIf="hasError('phone')" class="text-red-500 text-xs mt-1">Enter a valid 10–11 digit phone number</p>
       </div>
 
       <!-- Email -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input 
-          type="email" 
-          formControlName="email"
-          placeholder="Enter email address"
-          class="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none"
-          [class.border-red-500]="f['email'].touched && f['email'].errors"
-        >
-        <div *ngIf="f['email'].touched && f['email'].errors" class="text-red-500 text-xs mt-1">
-          Valid email is required
-        </div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-gray-400">(optional)</span></label>
+        <input type="email" formControlName="email" placeholder="email@example.com"
+               class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-colors"
+               [class.border-red-400]="hasError('email')"
+               [class.border-gray-200]="!hasError('email')"
+               inputmode="email">
+        <p *ngIf="hasError('email')" class="text-red-500 text-xs mt-1">Enter a valid email address</p>
       </div>
 
-      <!-- Billing Address -->
+      <!-- Billing address -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Billing address</label>
-        <textarea 
-          formControlName="billingAddress"
-          rows="3"
-          placeholder="E.g., Road no 1, Abc Building, Floor 2"
-          class="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none resize-none"
-        ></textarea>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Billing address <span class="text-gray-400">(optional)</span></label>
+        <textarea formControlName="billingAddress" rows="3"
+                  placeholder="Road no 1, Abc Building, Floor 2…"
+                  class="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none resize-none text-sm"></textarea>
       </div>
 
       <!-- Actions -->
-      <div class="flex space-x-3 pt-4">
-        <button 
-          type="button"
-          (click)="close.emit()"
-          class="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
-        >
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="close.emit()"
+                class="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors text-sm">
           Cancel
         </button>
-        <button 
-          type="submit"
-          [disabled]="customerForm.invalid || loading"
-          class="flex-1 py-3 bg-primary-500 text-white rounded-xl font-medium hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-primary-500/30"
-        >
-          {{ loading ? 'Adding...' : 'Add customer' }}
+        <button type="submit"
+                [disabled]="customerForm.invalid || loading"
+                class="flex-1 py-3 bg-primary-500 text-white rounded-xl font-medium hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-primary-500/30 text-sm flex items-center justify-center gap-2">
+          <svg *ngIf="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+          </svg>
+          {{ loading ? 'Adding…' : 'Add Customer' }}
         </button>
       </div>
     </form>

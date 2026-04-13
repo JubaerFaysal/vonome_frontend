@@ -8,7 +8,7 @@ export interface Medicine {
   stockQuantity: number;
   isDiscounted: boolean;
   discountPercent: number;
-  imageUrl?: string;
+  imageUrl?: string | null;
   isInStock: boolean;
   discountedPrice: number;
   createdAt?: Date;
