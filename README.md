@@ -65,27 +65,17 @@ vonome_frontend/
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-- Node.js (v18 or higher)
-- Yarn 1.22.22 or npm
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/JubaerFaysal/vonome_frontend.git
    cd vonome_frontend
    ```
 
 2. **Install dependencies**
-   ```bash
-   yarn install
-   ```
-   Or with npm:
-   ```bash
-   npm install
-   ```
+
 
 ### Development Server
 
@@ -101,38 +91,7 @@ ng serve
 
 Once running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any source files.
 
-### Building for Production
 
-Build the project for deployment:
-
-```bash
-npm run build
-```
-
-The build artifacts will be stored in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## 🧪 Testing
-
-### Running Unit Tests
-
-Execute unit tests with [Vitest](https://vitest.dev/):
-
-```bash
-npm test
-```
-
-### Code Scaffolding
-
-Generate new components using Angular CLI:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics:
-```bash
-ng generate --help
-```
 
 ## 📸 Screenshots
 
